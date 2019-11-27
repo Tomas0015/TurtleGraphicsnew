@@ -58,7 +58,9 @@ namespace TurtleGraphics {
 		private PenLineCap _lineCapping;
 		private bool _controlsVisible = true;
 		private ICommand _controlsVisibleCommand;
+		private bool _animatePath;
 
+		public bool AnimatePath { get => _animatePath; set { _animatePath = value; Notify(nameof(AnimatePath)); } }
 		public ICommand ControlsVisibleCommand { get => _controlsVisibleCommand; set { _controlsVisibleCommand = value; Notify(nameof(ControlsVisibleCommand)); } }
 		public bool ControlsVisible { get => _controlsVisible; set { _controlsVisible = value; Notify(nameof(ControlsVisible)); } }
 		public string AngleStr { get => $"{Math.Floor(ContextExtensions.AsDeg(Angle))}°"; }
@@ -105,7 +107,6 @@ namespace TurtleGraphics {
 
 		public double DrawWidth { get; set; }
 		public double DrawHeight { get; set; }
-		public bool AnimatePath { get; set; }
 		public static MainWindow Instance { get; set; }
 		public FileSystemManager FSSManager { get; set; }
 		public bool SaveDialogActive { get; set; }
@@ -271,17 +272,24 @@ namespace TurtleGraphics {
 				if (change.AddedLength == Environment.NewLine.Length) {
 					string changedText = _commandsText.Substring(change.Offset, change.AddedLength);
 					if (changedText == Environment.NewLine) {
-						string region = _commandsText.Substring(0, CommandsTextInput.CaretIndex);
-						int indentLevel = region.Count(s => s == '{') - region.Count(s => s == '}');
-						int carret = CommandsTextInput.CaretIndex;
-						CommandsTextInput.Text = CommandsTextInput.Text.Insert(change.Offset + change.AddedLength, new string(' ', 3 * indentLevel < 0 ? 0 : indentLevel));
-#if INTELI_COMMANDS
-						InteliCommandsText = CommandsTextInput.Text;
-#endif
-						CommandsTextInput.CaretIndex = carret + 3 * indentLevel;
+						HandleNewLineIndent(change);
 					}
 				}
 			}
+		}
+
+		private void HandleNewLineIndent(TextChange change) {
+			string region = _commandsText.Substring(0, CommandsTextInput.CaretIndex);
+			int indentLevel = (region.Count(s => s == '{') - region.Count(s => s == '}')) * 3;
+			int carret = CommandsTextInput.CaretIndex;
+			if (!(carret < CommandsTextInput.Text.Length &&	CommandsTextInput.Text[carret] == '}')) {
+				CommandsTextInput.Text = CommandsTextInput.Text
+					.Insert(change.Offset + change.AddedLength, new string(' ', indentLevel <= 0 ? 0 : indentLevel));
+				CommandsTextInput.CaretIndex = carret + indentLevel;
+			}
+#if INTELI_COMMANDS
+			InteliCommandsText = CommandsTextInput.Text;
+#endif
 		}
 
 		protected override void OnKeyDown(KeyEventArgs e) {
@@ -301,7 +309,7 @@ namespace TurtleGraphics {
 			}
 
 			_currentPath = new Path();
-			Grid.SetColumn(_currentPath, 1);
+			Grid.SetColumn(_currentPath, 2);
 
 			if (!PenDown) {
 				_currentPath.Stroke = Brushes.Transparent;
@@ -341,7 +349,7 @@ namespace TurtleGraphics {
 			}
 
 			if (Angle > 2 * Math.PI) {
-				Angle -= 2 * Math.PI;
+				Angle %= 2 * Math.PI;
 			}
 		}
 

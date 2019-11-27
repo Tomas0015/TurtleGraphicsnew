@@ -6,6 +6,10 @@
         xmlns:local="clr-namespace:TurtleGraphics"
         mc:Ignorable="d"
         Title="MainWindow">
+	<d:Window.DataContext>
+		<local:MainWindow/>
+	</d:Window.DataContext>
+	
 	<Window.Resources>
 		<BooleanToVisibilityConverter x:Key="BoolToVis"/>
 	</Window.Resources>
@@ -13,6 +17,7 @@
 	<Grid x:Name="Paths" Background="{Binding ElementName=BackgroundColor, Path=Text}">
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="*" x:Name="ControlArea"/>
+			<ColumnDefinition Width="5" Name="SplitterCol"/>
 			<ColumnDefinition Width="3*" x:Name="DrawAreaX"/>
 		</Grid.ColumnDefinitions>
 		<Grid.RowDefinitions>
@@ -54,12 +59,30 @@
 					<TextBlock Text="Background Color:"/>
 					<TextBox Name="BackgroundColor" Text="Transparent"/>
 					<CheckBox Content="Show Turtle" IsChecked="{Binding ShowTurtleCheckBox}"/>
+					
 					<CheckBox Content="Animate Path" IsChecked="{Binding AnimatePath}"/>
-					<Slider Value="{Binding IterationCount, UpdateSourceTrigger=PropertyChanged}" Minimum="1" Maximum="50" TickFrequency="1" />
-					<Slider Value="{Binding CalculationFramesPreUIUpdate, UpdateSourceTrigger=PropertyChanged}" Minimum="1" Maximum="50" TickFrequency="1" Name="D"/>
+					<StackPanel Visibility="{Binding AnimatePath, Converter={StaticResource BoolToVis}}">
+						<TextBlock>
+						<Run Text="Path animation speed: "/>
+						<Run Text="{Binding ElementName=AnimSpeed, Path=Value, Mode=OneWay}"/>
+						<Run Text="/"/>
+						<Run Text="{Binding ElementName=AnimSpeed, Path=Maximum, Mode=OneWay}"/>
+						</TextBlock>
+						<Slider Visibility="{Binding AnimatePath, Converter={StaticResource BoolToVis}}"
+							Value="{Binding IterationCount, UpdateSourceTrigger=PropertyChanged}"
+							Minimum="1" Maximum="50" TickFrequency="1" Name="AnimSpeed"/>
+					</StackPanel>
+
+					<TextBlock>
+						<Run Text="Turtle speed: "/>
+						<Run Text="{Binding ElementName=TurtleSpeed, Path=Value, Mode=OneWay}"/>
+						<Run Text="/"/>
+						<Run Text="{Binding ElementName=TurtleSpeed, Path=Maximum, Mode=OneWay}"/>
+					</TextBlock>
+					<Slider Value="{Binding CalculationFramesPreUIUpdate, UpdateSourceTrigger=PropertyChanged}" Minimum="1" Maximum="50" TickFrequency="1" Name="TurtleSpeed"/>
 					<TextBlock TextWrapping="Wrap">
 					<Run Text="Speed:"/>
-					<Run Text="{Binding ElementName=D, Path=Value}"/>
+					<Run Text="{Binding CalculationFramesPreUIUpdate, Mode=OneWay}"/>
 					</TextBlock>
 				</StackPanel>
 				<StackPanel>
@@ -75,8 +98,14 @@
 			</StackPanel>
 		</Grid>
 
-		<Grid Grid.Column="1" Panel.ZIndex="1">
+		<GridSplitter Grid.Column="1" 
+					  Width="{Binding ElementName=SplitterCol, Path=Width}" 
+					  HorizontalAlignment="Stretch"
+					  ResizeDirection="Columns"
+					  Background="Transparent"/>
 
+		<Grid Grid.Column="2" Panel.ZIndex="1">
+			
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="auto"/>
 			</Grid.ColumnDefinitions>
