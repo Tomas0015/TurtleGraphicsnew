@@ -21,6 +21,7 @@ namespace TurtleGraphics {
 			{ "SetL", "ineCapping();" },
 			{ "St", "oreTurtlePosition();" },
 			{ "Re", "storeTurtlePosition();" },
+			{ "Ca", "ptureScreenshot();" },
 		};
 
 		private readonly Dictionary<string, int> _inteliCommandsIndexes = new Dictionary<string, int> {
@@ -35,7 +36,8 @@ namespace TurtleGraphics {
 			{ "SetC", 5 },
 			{ "SetL", 11 },
 			{ "St", 20 },
-			{ "Re", 20 }
+			{ "Re", 20 },
+			{ "Ca", 18 }
 		};
 
 		public string GetInteliCommand(string value) {

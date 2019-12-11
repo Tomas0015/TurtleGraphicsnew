@@ -8,10 +8,8 @@ namespace TurtleGraphicsCode {
 		/// This is the place to put your turtle code
 		/// </summary>
 		public Turtle ToExecute() {
-
-			return new LSystem2().Create(5);
-
-			Turtle t = new Turtle();
+			Turtle t = new Turtle(true);
+			t.BackgroundColor = "Black";
 			t.Rotate(-90);
 
 			for (int i = 0; i < 6; i++) {
@@ -23,6 +21,7 @@ namespace TurtleGraphicsCode {
 
 				t.RestoreTurtlePosition();
 				t.Rotate(60);
+				t.CaptureScreenshot();
 			}
 			return t;
 		}

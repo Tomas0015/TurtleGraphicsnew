@@ -25,7 +25,7 @@ namespace TurtleGraphics {
 			DataContext = this;
 
 			Loaded += CompilationStatus_Loaded;
-			Grid.SetColumn(this, 1);
+			Grid.SetColumn(this, MainWindow.PAGES_COLUMN_INDEX);
 		}
 
 

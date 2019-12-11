@@ -11,5 +11,6 @@
 		StorePos,
 		RestorePos,
 		VariableChange,
+		ScreenCapture,
 	}
 }

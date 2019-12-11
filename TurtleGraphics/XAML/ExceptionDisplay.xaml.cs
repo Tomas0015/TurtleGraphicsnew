@@ -67,6 +67,7 @@ namespace TurtleGraphics {
 		}
 
 		public void Show() {
+			Grid.SetColumn(this, 2);
 			MainWindow.Instance.Paths.Children.Add(this);
 		}
 	}

@@ -11,7 +11,10 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using Igor.Models;
+using System.IO;
+using System.Windows.Media.Imaging;
 using static TurtleGraphics.Helpers;
+using Path = System.Windows.Shapes.Path;
 
 namespace TurtleGraphics {
 	/// <summary>
@@ -28,6 +31,8 @@ namespace TurtleGraphics {
 		}
 
 		#endregion
+
+		public const int PAGES_COLUMN_INDEX = 2;
 
 
 		#region Bindings
@@ -59,7 +64,9 @@ namespace TurtleGraphics {
 		private bool _controlsVisible = true;
 		private ICommand _controlsVisibleCommand;
 		private bool _animatePath;
+		private ImageSource _imgSource;
 
+		public ImageSource ImgSource { get => _imgSource; set { _imgSource = value; Notify(nameof(ImgSource)); } }
 		public bool AnimatePath { get => _animatePath; set { _animatePath = value; Notify(nameof(AnimatePath)); } }
 		public ICommand ControlsVisibleCommand { get => _controlsVisibleCommand; set { _controlsVisibleCommand = value; Notify(nameof(ControlsVisibleCommand)); } }
 		public bool ControlsVisible { get => _controlsVisible; set { _controlsVisible = value; Notify(nameof(ControlsVisible)); } }
@@ -112,6 +119,8 @@ namespace TurtleGraphics {
 		public bool SaveDialogActive { get; set; }
 		public bool LoadDialogActive { get; set; }
 		public bool ExceptionDialogActive { get; set; }
+		public bool IsFullscreen { get; set; }
+		public bool ControlsHidden { get; set; }
 
 		public MainWindow() {
 			InitializeComponent();
@@ -131,6 +140,7 @@ namespace TurtleGraphics {
 					IterationCount = 1;
 					PathAnimationFrames = 1;
 					ButtonCommand.Execute(null);
+					ControlsHidden = true;
 					PreviewKeyDown += MainWindow_KeyDown;
 				}
 			});
@@ -143,7 +153,7 @@ namespace TurtleGraphics {
 					return;
 				SaveDialogActive = true;
 				SaveDialog d = new SaveDialog();
-				Grid.SetColumn(d, 1);
+				Grid.SetColumn(d, PAGES_COLUMN_INDEX);
 				Paths.Children.Add(d);
 			});
 			LoadCommand = new Command(async () => {
@@ -244,8 +254,10 @@ namespace TurtleGraphics {
 		private async void MainWindow_KeyDown(object sender, KeyEventArgs e) {
 			if (e.Key == Key.Escape) {
 				ControlArea.Width = new GridLength(1, GridUnitType.Star);
+				ImgSource = new BitmapImage();
 				await Task.Delay(1);
 				DrawWidth = DrawAreaX.ActualWidth;
+				ControlsHidden = false;
 				PreviewKeyDown -= MainWindow_KeyDown;
 			}
 		}
@@ -282,7 +294,7 @@ namespace TurtleGraphics {
 			string region = _commandsText.Substring(0, CommandsTextInput.CaretIndex);
 			int indentLevel = (region.Count(s => s == '{') - region.Count(s => s == '}')) * 3;
 			int carret = CommandsTextInput.CaretIndex;
-			if (!(carret < CommandsTextInput.Text.Length &&	CommandsTextInput.Text[carret] == '}')) {
+			if (!(carret < CommandsTextInput.Text.Length && CommandsTextInput.Text[carret] == '}')) {
 				CommandsTextInput.Text = CommandsTextInput.Text
 					.Insert(change.Offset + change.AddedLength, new string(' ', indentLevel <= 0 ? 0 : indentLevel));
 				CommandsTextInput.CaretIndex = carret + indentLevel;
@@ -309,7 +321,7 @@ namespace TurtleGraphics {
 			}
 
 			_currentPath = new Path();
-			Grid.SetColumn(_currentPath, 2);
+			Grid.SetColumn(_currentPath, PAGES_COLUMN_INDEX);
 
 			if (!PenDown) {
 				_currentPath.Stroke = Brushes.Transparent;
@@ -332,6 +344,41 @@ namespace TurtleGraphics {
 			_currentPath.Data = pGeometry;
 			Paths.Children.Add(_currentPath);
 		}
+
+		private async Task Capture() {
+			PresentationSource presentationSource = PresentationSource.FromVisual(Application.Current.MainWindow);
+			Matrix m = presentationSource.CompositionTarget.TransformToDevice;
+			double dipWidth = m.M11;
+			double dipHeight = m.M22;
+			double actualHeight = SystemParameters.PrimaryScreenHeight * dipHeight;
+			double actualWidth = SystemParameters.PrimaryScreenWidth * dipWidth;
+
+			await Task.Run(() => {
+				using (MemoryStream ms = new MemoryStream()) {
+					int ix, iy, iw, ih;
+					ix = 0;
+					iy = 0;
+					iw = (int)actualWidth; //TODO validate
+					ih = (int)actualHeight; //TODO validate
+					System.Drawing.Bitmap image = new System.Drawing.Bitmap(iw, ih, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+					System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(image);
+					g.CopyFromScreen(ix, iy, ix, iy, new System.Drawing.Size(iw, ih), System.Drawing.CopyPixelOperation.SourceCopy);
+					image.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+					var i = new BitmapImage();
+					i.BeginInit();
+					i.CacheOption = BitmapCacheOption.OnLoad;
+					i.StreamSource = ms;
+					i.EndInit();
+					i.Freeze();
+					Dispatcher.Invoke(() => {
+						ImgSource = i;
+						const int OFFSET = 3;
+						Paths.Children.RemoveRange(OFFSET, Paths.Children.Count - OFFSET - 80);
+					});
+				}
+			});
+		}
+
 
 		public void Rotate(double angle, bool setRotation) {
 			if (double.IsNaN(angle)) {
@@ -436,6 +483,13 @@ namespace TurtleGraphics {
 						NewPath();
 						break;
 					}
+					case ParsedAction.ScreenCapture: {
+						// Check if controls are hidden as well? Or not for the memes ;)
+						if (IsFullscreen) {
+							await Capture();
+						}
+						break;
+					}
 				}
 			}
 		}
@@ -532,10 +586,15 @@ namespace TurtleGraphics {
 			if (WindowStyle == WindowStyle.SingleBorderWindow) {
 				WindowStyle = WindowStyle.None;
 				WindowState = WindowState.Maximized;
+				SplitterCol.Width = new GridLength(0);
+				IsFullscreen = true;
 			}
 			else {
 				WindowStyle = WindowStyle.SingleBorderWindow;
 				WindowState = WindowState.Normal;
+				ImgSource = new BitmapImage();
+				SplitterCol.Width = new GridLength(5);
+				IsFullscreen = false;
 			}
 		}
 

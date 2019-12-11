@@ -127,6 +127,10 @@ namespace TurtleGraphics {
 						return new RestorePositionData(info.Arguments, variables.Copy(), original);
 					}
 
+					case "CaptureScreenshot": {
+						return new ScreenCaptureData(info.Arguments, original, variables.Copy());
+					}
+
 					default: {
 						throw new ParsingException($"Unknown function!", line);
 					}

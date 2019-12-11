@@ -282,5 +282,12 @@ namespace TurtleGraphicsCode {
 		public void RestoreTurtlePosition(bool pop = false) {
 			_data.Add(new TurtleData() { Action = ParsedAction.RestorePos, PopPosition = pop });
 		}
+
+		/// <summary>
+		/// Capture screenshot of current drawing to improve performance
+		/// </summary>
+		public void CaptureScreenshot() {
+			_data.Add(new TurtleData() { Action = ParsedAction.ScreenCapture });
+		}
 	}
 }
