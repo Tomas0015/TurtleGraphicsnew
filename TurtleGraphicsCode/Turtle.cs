@@ -290,6 +290,7 @@ namespace TurtleGraphicsCode {
 		/// Capture screenshot of current drawing to improve performance
 		/// </summary>
 		public void CaptureScreenshot() {
+			FullScreen = true;
 			_data.Add(new TurtleData() { Action = ParsedAction.ScreenCapture });
 		}
 	}
