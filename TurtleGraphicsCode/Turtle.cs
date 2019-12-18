@@ -77,6 +77,7 @@ namespace TurtleGraphicsCode {
 		public bool AnimatePath { get; set; }
 
 		private int _pathAnimationSpeed = 1;
+		private Stack<(double, double)> _storedPositions = new Stack<(double, double)>();
 
 		/// <summary>
 		/// The speed at which to draw the path
@@ -272,6 +273,7 @@ namespace TurtleGraphicsCode {
 		/// Store turtle's position and rotation.
 		/// </summary>
 		public void StoreTurtlePosition() {
+			_storedPositions.Push((X, Y));
 			_data.Add(new TurtleData() { Action = ParsedAction.StorePos });
 		}
 
@@ -280,6 +282,7 @@ namespace TurtleGraphicsCode {
 		/// </summary>
 		/// <param name="pop">remove the entry from restore history</param>
 		public void RestoreTurtlePosition(bool pop = false) {
+			(X, Y) = pop ? _storedPositions.Pop() : _storedPositions.Peek(); 
 			_data.Add(new TurtleData() { Action = ParsedAction.RestorePos, PopPosition = pop });
 		}
 
