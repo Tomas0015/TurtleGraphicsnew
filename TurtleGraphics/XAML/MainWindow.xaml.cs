@@ -53,7 +53,7 @@ namespace TurtleGraphics {
 		private string _buttonText = "Run (F5)";
 		private ICommand _toggleFullScreenCommand;
 		private bool _toggleFullscreenEnabled = true;
-		private string _buttonTextFullSize = "Run on fullsize canvas";
+		private string _buttonTextFullSize = "Run on full size canvas";
 		private ICommand _buttonFullSizeCommand;
 		private bool _showTurtleCheckBox = true;
 		private string _inteliCommandsText;
@@ -547,7 +547,7 @@ namespace TurtleGraphics {
 				s.Stop();
 			}
 			catch (OperationCanceledException) {
-				//Operation was cancelled
+				//Operation was canceled
 				_compilationStatus.Stop();
 			}
 			catch (ParsingException e) {

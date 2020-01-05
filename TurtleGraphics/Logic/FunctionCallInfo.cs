@@ -4,6 +4,6 @@
 		public string[] Arguments { get; set; }
 
 		public string GetArg(int i, string line) => Arguments.Length > i ?
-			Arguments[i] : throw new ParsingException("Not enogh arguments provided supplied to the function!", line);
+			Arguments[i] : throw new ParsingException("Not enough arguments provided supplied to the function!", line);
 	}
 }

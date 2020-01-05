@@ -6,7 +6,7 @@ using TurtleGraphics;
 
 namespace TurtleGraphicsCode {
 	/// <summary>
-	/// Represents a Turtle. Provieds basic functions to work with turtle on a canvas.
+	/// Represents a Turtle. Provides basic functions to work with turtle on a canvas.
 	/// </summary>
 	public class Turtle {
 
@@ -57,12 +57,12 @@ namespace TurtleGraphicsCode {
 		public double Y { get; private set; }
 
 		/// <summary>
-		/// Turltes current angle in radians
+		/// Turtles current angle in radians
 		/// </summary>
 		public double Angle { get; private set; }
 
 		/// <summary>
-		/// Screen ceter point X coordinate
+		/// Screen center point X coordinate
 		/// </summary>
 		public double MidX => ScreenWidth / 2;
 
