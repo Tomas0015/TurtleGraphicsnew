@@ -15,6 +15,7 @@ using System.IO;
 using System.Windows.Media.Imaging;
 using static TurtleGraphics.Helpers;
 using Path = System.Windows.Shapes.Path;
+using System.Windows.Interop;
 
 namespace TurtleGraphics {
 	/// <summary>
@@ -121,6 +122,7 @@ namespace TurtleGraphics {
 		public bool ExceptionDialogActive { get; set; }
 		public bool IsFullscreen { get; set; }
 		public bool ControlsHidden { get; set; }
+		public bool IsFullSize { get; set; }
 
 		public MainWindow() {
 			InitializeComponent();
@@ -141,11 +143,12 @@ namespace TurtleGraphics {
 					PathAnimationFrames = 1;
 					ButtonCommand.Execute(null);
 					ControlsHidden = true;
-					PreviewKeyDown += MainWindow_KeyDown;
+					IsFullSize = true;
 				}
 			});
 			Loaded += MainWindow_Loaded;
 			Closed += MainWindow_Closed;
+			PreviewKeyDown += MainWindow_KeyDown;
 
 			FSSManager = new FileSystemManager();
 			SaveCommand = new Command(() => {
@@ -252,13 +255,23 @@ namespace TurtleGraphics {
 		}
 
 		private async void MainWindow_KeyDown(object sender, KeyEventArgs e) {
-			if (e.Key == Key.Escape) {
+			if (e.Key == Key.Escape && IsFullSize) {
 				ControlArea.Width = new GridLength(1, GridUnitType.Star);
 				ImgSource = new BitmapImage();
 				await Task.Delay(1);
 				DrawWidth = DrawAreaX.ActualWidth;
 				ControlsHidden = false;
-				PreviewKeyDown -= MainWindow_KeyDown;
+				IsFullSize = false;
+			}
+			if (e.KeyboardDevice.Modifiers == (ModifierKeys.Control | ModifierKeys.Alt) && e.Key == Key.C) {
+				if (IsFullscreen && IsFullSize) {
+					var (actualWidth, actualHeight) = GetActualScreenSize();
+					System.Drawing.Bitmap bitmap;
+					using (MemoryStream ms = CaptureScreenshot(actualWidth, actualHeight)) {
+						bitmap = (System.Drawing.Bitmap)System.Drawing.Bitmap.FromStream(ms);
+					}
+					bitmap.Save(System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "ScreenCapture.png"), System.Drawing.Imaging.ImageFormat.Png);
+				}
 			}
 		}
 
@@ -346,24 +359,10 @@ namespace TurtleGraphics {
 		}
 
 		private async Task Capture() {
-			PresentationSource presentationSource = PresentationSource.FromVisual(Application.Current.MainWindow);
-			Matrix m = presentationSource.CompositionTarget.TransformToDevice;
-			double dipWidth = m.M11;
-			double dipHeight = m.M22;
-			double actualHeight = SystemParameters.PrimaryScreenHeight * dipHeight;
-			double actualWidth = SystemParameters.PrimaryScreenWidth * dipWidth;
+			var (actualWidth, actualHeight) = GetActualScreenSize();
 
 			await Task.Run(() => {
-				using (MemoryStream ms = new MemoryStream()) {
-					int ix, iy, iw, ih;
-					ix = 0;
-					iy = 0;
-					iw = (int)actualWidth; //TODO validate
-					ih = (int)actualHeight; //TODO validate
-					System.Drawing.Bitmap image = new System.Drawing.Bitmap(iw, ih, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-					System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(image);
-					g.CopyFromScreen(ix, iy, ix, iy, new System.Drawing.Size(iw, ih), System.Drawing.CopyPixelOperation.SourceCopy);
-					image.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+				using (MemoryStream ms = CaptureScreenshot(actualWidth, actualHeight)) {
 					var i = new BitmapImage();
 					i.BeginInit();
 					i.CacheOption = BitmapCacheOption.OnLoad;
@@ -377,6 +376,27 @@ namespace TurtleGraphics {
 					});
 				}
 			});
+		}
+
+		private MemoryStream CaptureScreenshot(int width, int height) {
+			MemoryStream ms = new MemoryStream();
+			int ix = 0;
+			int iy = 0;
+			System.Drawing.Bitmap image = new System.Drawing.Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+			System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(image);
+			g.CopyFromScreen(ix, iy, ix, iy, new System.Drawing.Size(width, height), System.Drawing.CopyPixelOperation.SourceCopy);
+			image.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+			return ms;
+		}
+
+		private (int, int) GetActualScreenSize() {
+			PresentationSource presentationSource = PresentationSource.FromVisual(Application.Current.MainWindow);
+			Matrix m = presentationSource.CompositionTarget.TransformToDevice;
+			double dipWidth = m.M11;
+			double dipHeight = m.M22;
+			double actualHeight = SystemParameters.PrimaryScreenHeight * dipHeight;
+			double actualWidth = SystemParameters.PrimaryScreenWidth * dipWidth;
+			return ((int)actualWidth, (int)actualHeight);
 		}
 
 
