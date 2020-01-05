@@ -584,10 +584,12 @@ namespace TurtleGraphics {
 
 		public void ToggleFullScreenAction() {
 			if (WindowStyle == WindowStyle.SingleBorderWindow) {
+				Visibility = Visibility.Collapsed;
 				WindowStyle = WindowStyle.None;
 				WindowState = WindowState.Maximized;
 				SplitterCol.Width = new GridLength(0);
 				IsFullscreen = true;
+				Visibility = Visibility.Visible;
 			}
 			else {
 				WindowStyle = WindowStyle.SingleBorderWindow;
