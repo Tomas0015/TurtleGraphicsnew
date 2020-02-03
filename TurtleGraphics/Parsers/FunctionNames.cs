@@ -13,6 +13,7 @@ namespace TurtleGraphics {
 			"SetLineCapping",
 			"PenUp",
 			"PenDown",
+			"CaptureScreenshot"
 		};
 	}
 }

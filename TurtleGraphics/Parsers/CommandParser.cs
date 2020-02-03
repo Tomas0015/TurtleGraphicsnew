@@ -152,6 +152,9 @@ namespace TurtleGraphics {
 					return data;
 				}
 				if (line.Contains("else")) {
+					if(conditionals.Count == 0) {
+						throw new ParsingException("Missing 'if' statement for this 'else' branch", line);
+					}
 					ConditionalData latest = conditionals.Peek();
 					latest.AddElse(reader, line);
 					latest.IsModifiable = false;
