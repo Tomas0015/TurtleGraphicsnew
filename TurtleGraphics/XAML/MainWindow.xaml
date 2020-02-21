@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TurtleGraphics"
         mc:Ignorable="d"
-        Title="MainWindow">
+        Title="{Binding Main_WindowName}">
 	<d:Window.DataContext>
 		<local:MainWindow/>
 	</d:Window.DataContext>
@@ -45,7 +45,7 @@
 				<StackPanel Grid.Row="1" Visibility="{Binding ControlsVisible, Converter={StaticResource BoolToVis}}">
 					<StackPanel>
 						<TextBlock>
-					<Run Text="Angle:"/>
+					<Run Text="{Binding Main_Angle, Mode=OneWay}"/>
 					<Run Text="{Binding AngleStr, Mode=OneWay}"/>
 						</TextBlock>
 						<TextBlock>
@@ -56,14 +56,14 @@
 					<Run Text="Y:"/>
 					<Run Text="{Binding YStr, Mode=OneWay}"/>
 						</TextBlock>
-						<TextBlock Text="Background Color:"/>
+						<TextBlock Text="{Binding Main_BackgroundCol}"/>
 						<TextBox Name="BackgroundColor" Text="Transparent"/>
-						<CheckBox Content="Show Turtle" IsChecked="{Binding ShowTurtleCheckBox}"/>
+						<CheckBox Content="{Binding Main_ShowTurtle}" IsChecked="{Binding ShowTurtleCheckBox}"/>
 
-						<CheckBox Content="Animate Path" IsChecked="{Binding AnimatePath}"/>
+						<CheckBox Content="{Binding Main_AnimatePath}" IsChecked="{Binding AnimatePath}"/>
 						<StackPanel Visibility="{Binding AnimatePath, Converter={StaticResource BoolToVis}}">
 							<TextBlock>
-						<Run Text="Path animation speed: "/>
+						<Run Text="{Binding Main_PathAnimSpeed, Mode=OneWay}"/>
 						<Run Text="{Binding ElementName=AnimSpeed, Path=Value, Mode=OneWay}"/>
 						<Run Text="/"/>
 						<Run Text="{Binding ElementName=AnimSpeed, Path=Maximum, Mode=OneWay}"/>
@@ -74,39 +74,39 @@
 						</StackPanel>
 
 						<TextBlock>
-						<Run Text="Turtle speed: "/>
+						<Run Text="{Binding Main_TurtleSpeed, Mode=OneWay}"/>
 						<Run Text="{Binding ElementName=TurtleSpeed, Path=Value, Mode=OneWay}"/>
 						<Run Text="/"/>
 						<Run Text="{Binding ElementName=TurtleSpeed, Path=Maximum, Mode=OneWay}"/>
 						</TextBlock>
 						<Slider Value="{Binding CalculationFramesPreUIUpdate, UpdateSourceTrigger=PropertyChanged}" Minimum="1" Maximum="50" TickFrequency="1" Name="TurtleSpeed"/>
-						<TextBlock TextWrapping="Wrap">
-					<Run Text="Speed:"/>
-					<Run Text="{Binding CalculationFramesPreUIUpdate, Mode=OneWay}"/>
-						</TextBlock>
 					</StackPanel>
 					<StackPanel>
 						<Button Content="{Binding ButtonText, FallbackValue='Run/Stop'}" Command="{Binding ButtonCommand}"/>
+						<!-- Old way of doing things
 						<Button Content="{Binding ButtonTextFullSize, FallbackValue='Run Full-size'}" Command="{Binding ButtonFullSizeCommand}"/>
-						<Button Content="Toggle Fullscreen" Command="{Binding ToggleFullScreenCommand}" IsEnabled="{Binding ToggleFullscreenEnabled}"/>
-						<Button Content="Save" Command="{Binding SaveCommand}"/>
-						<Button Content="Load" Command="{Binding LoadCommand}"/>
+						<Button Content="{Binding Main_ToggleFullscreen, FallbackValue='TODO Toggle Fullscreen'}" Command="{Binding ToggleFullScreenCommand}" IsEnabled="{Binding ToggleFullscreenEnabled}"/>
+						-->
+						<Button Content="{Binding Main_RunFullscreen}" Command="{Binding RunFullscreenCommand}"/>
+						<Button Content="{Binding GenericSave}" Command="{Binding SaveCommand}"/>
+						<Button Content="{Binding GenericLoad}" Command="{Binding LoadCommand}"/>
+						<Button Content="{Binding Main_Settings}" Command="{Binding SettingsCommand}"/>
 					</StackPanel>
 				</StackPanel>
 				<StackPanel Grid.Row="2">
-					<Button Content="Show/Hide Control Panel" Command="{Binding ControlsVisibleCommand}"/>
+					<Button Content="{Binding Main_ToggleControlPanel}" Command="{Binding ControlsVisibleCommand}"/>
 				</StackPanel>
 			</Grid>
 
-			<GridSplitter Grid.Column="1" 
-					  Width="{Binding ElementName=SplitterCol, Path=Width}" 
-					  HorizontalAlignment="Stretch"
-					  ResizeDirection="Columns"
-					  Background="Transparent"/>
+			<GridSplitter Grid.Column="1"
+						  Width="{Binding ElementName=SplitterCol, Path=Width}" 
+						  HorizontalAlignment="Stretch"
+						  ResizeDirection="Columns"
+						  Background="Transparent"/>
 
 			<Image Grid.Column="2" Source="{Binding ImgSource}"/>
 
-			<Grid Grid.Column="2" Panel.ZIndex="1">
+			<Grid Grid.Column="2" Panel.ZIndex="1" SizeChanged="Grid_SizeChanged">
 
 				<Grid.ColumnDefinitions>
 					<ColumnDefinition Width="auto"/>

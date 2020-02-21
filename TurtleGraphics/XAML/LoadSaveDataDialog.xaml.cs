@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Igor.Localization;
 using Igor.Models;
 
 namespace TurtleGraphics {
@@ -22,6 +23,9 @@ namespace TurtleGraphics {
 		}
 
 		#endregion
+
+		public string GenericCancel => LocaleProvider.Instance.Get(Locale.GENERIC_CANCEL);
+		public string GenericLoad => LocaleProvider.Instance.Get(Locale.GENERIC_LOAD);
 
 		public LoadSaveDataDialog() {
 			InitializeComponent();

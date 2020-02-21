@@ -9,12 +9,12 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Shapes;
 using Igor.Models;
 using System.IO;
 using System.Windows.Media.Imaging;
 using static TurtleGraphics.Helpers;
 using Path = System.Windows.Shapes.Path;
+using Igor.Localization;
 
 namespace TurtleGraphics {
 	/// <summary>
@@ -34,7 +34,6 @@ namespace TurtleGraphics {
 
 		public const int PAGES_COLUMN_INDEX = 2;
 
-
 		#region Bindings
 
 		private string _color;
@@ -50,11 +49,9 @@ namespace TurtleGraphics {
 		private int _iterationCount = 1;
 		private ICommand _buttonCommand;
 		private ICommand _stopCommand;
-		private string _buttonText = "Run (F5)";
-		private ICommand _toggleFullScreenCommand;
+		private string _buttonText;
+		private ICommand _runFullscreenCommand;
 		private bool _toggleFullscreenEnabled = true;
-		private string _buttonTextFullSize = "Run on fullsize canvas";
-		private ICommand _buttonFullSizeCommand;
 		private bool _showTurtleCheckBox = true;
 		private string _inteliCommandsText;
 		private ICommand _saveCommand;
@@ -79,10 +76,8 @@ namespace TurtleGraphics {
 		public ICommand SaveCommand { get => _saveCommand; set { _saveCommand = value; Notify(nameof(SaveCommand)); } }
 		public string InteliCommandsText { get => _inteliCommandsText; set { _inteliCommandsText = value; Notify(nameof(InteliCommandsText)); } }
 		public bool ShowTurtleCheckBox { get => _showTurtleCheckBox; set { _showTurtleCheckBox = value; Notify(nameof(ShowTurtleCheckBox)); } }
-		public ICommand ButtonFullSizeCommand { get => _buttonFullSizeCommand; set { _buttonFullSizeCommand = value; Notify(nameof(ButtonFullSizeCommand)); } }
-		public string ButtonTextFullSize { get => _buttonTextFullSize; set { _buttonTextFullSize = value; Notify(nameof(ButtonTextFullSize)); } }
 		public bool ToggleFullscreenEnabled { get => _toggleFullscreenEnabled; set { _toggleFullscreenEnabled = value; Notify(nameof(ToggleFullscreenEnabled)); } }
-		public ICommand ToggleFullScreenCommand { get => _toggleFullScreenCommand; set { _toggleFullScreenCommand = value; Notify(nameof(ToggleFullScreenAction)); } }
+		public ICommand RunFullscreenCommand { get => _runFullscreenCommand; set { _runFullscreenCommand = value; Notify(nameof(ToggleFullScreenAction)); } }
 		public string ButtonText { get => _buttonText; set { _buttonText = value; Notify(nameof(ButtonText)); } }
 		public ICommand StopCommand { get => _stopCommand; set { _stopCommand = value; Notify(nameof(StopCommand)); } }
 		public ICommand ButtonCommand { get => _buttonCommand; set { _buttonCommand = value; Notify(nameof(ButtonCommand)); } }
@@ -101,6 +96,26 @@ namespace TurtleGraphics {
 
 		#endregion
 
+		#region Language
+
+		public string Main_WindowName => LocaleProvider.Instance.Get(Locale.MAIN__WINDOW_NAME);
+		public string Main_Angle => LocaleProvider.Instance.Get(Locale.MAIN__ANGLE);
+		public string Main_AnimatePath => LocaleProvider.Instance.Get(Locale.MAIN__ANIMATE_PATH);
+		public string Main_BackgroundCol => LocaleProvider.Instance.Get(Locale.MAIN__BACKGROUND_COL);
+		public string Main_PathAnimSpeed => LocaleProvider.Instance.Get(Locale.MAIN__PATH_ANIM_SPEED);
+		public string Main_ToggleControlPanel => LocaleProvider.Instance.Get(Locale.MAIN__TOGGLE_CONTROL_PANEL);
+		public string Main_TurtleSpeed => LocaleProvider.Instance.Get(Locale.MAIN__TURTLE_SPEED);
+		public string Main_ShowTurtle => LocaleProvider.Instance.Get(Locale.MAIN__SHOW_TURTLE);
+		public string GenericLoad => LocaleProvider.Instance.Get(Locale.GENERIC_LOAD);
+		public string GenericSave => LocaleProvider.Instance.Get(Locale.GENERIC_SAVE);
+		public string Main_RunFullscreen => LocaleProvider.Instance.Get(Locale.MAIN__RUN_FULLSCREEN) + " (Ctrl + F5)";
+		public string Main_Settings => LocaleProvider.Instance.Get(Locale.MAIN__SETTINGS);
+		public string GenericRun => LocaleProvider.Instance.Get(Locale.GENERIC_RUN) + " (F5)";
+		public string GenericStop => LocaleProvider.Instance.Get(Locale.GENERIC_STOP) + " (F5)";
+
+		#endregion
+
+		#region Standard Properties
 
 		private Path _currentPath;
 		private PathFigure _currentFigure;
@@ -120,61 +135,42 @@ namespace TurtleGraphics {
 		public bool LoadDialogActive { get; set; }
 		public bool ExceptionDialogActive { get; set; }
 		public bool IsFullscreen { get; set; }
-		public bool ControlsHidden { get; set; }
+		public bool ControlPanelHolderVisible { get; set; } = true;
+
+		#endregion
 
 		public MainWindow() {
 			InitializeComponent();
+
 			RunCommand = new AsyncCommand(RunCommandAction);
-			StopCommand = new Command(() => {
-				cancellationTokenSource.Cancel();
-				ButtonCommand = RunCommand;
-				ButtonText = "Run (F5)";
-			});
+			StopCommand = new Command(StopCommandAction);
+			SaveCommand = new Command(SaveCommandAction);
+			LoadCommand = new AsyncCommand(LoadCommandAction);
+			ControlsVisibleCommand = new Command(() => ControlsVisible ^= true);
+			RunFullscreenCommand = new AsyncCommand(RunFullscreenCommandAction);
+
 			ButtonCommand = RunCommand;
-			ToggleFullScreenCommand = new Command(ToggleFullScreenAction);
-			ButtonFullSizeCommand = new Command(async () => {
-				if (ButtonCommand == RunCommand && NoWindowsActive) {
-					ControlArea.Width = new GridLength(0, GridUnitType.Pixel);
-					await Task.Delay(1);
-					DrawWidth = DrawAreaX.ActualWidth;
-					IterationCount = 1;
-					PathAnimationFrames = 1;
-					ButtonCommand.Execute(null);
-					ControlsHidden = true;
-					PreviewKeyDown += MainWindow_KeyDown;
-				}
-			});
+			ButtonText = GenericRun;
+
+			FSSManager = new FileSystemManager();
+
 			Loaded += MainWindow_Loaded;
 			Closed += MainWindow_Closed;
 
-			FSSManager = new FileSystemManager();
-			SaveCommand = new Command(() => {
-				if (!NoWindowsActive)
-					return;
-				SaveDialogActive = true;
-				SaveDialog d = new SaveDialog();
-				Grid.SetColumn(d, PAGES_COLUMN_INDEX);
-				Paths.Children.Add(d);
-			});
-			LoadCommand = new Command(async () => {
-				if (!NoWindowsActive)
-					return;
-				LoadDialogActive = true;
-				SavedData data = await FSSManager.Load();
-				LoadDialogActive = false;
-				if (data.Name != null) {
-					CommandsText = data.Code;
-				}
-			});
-			ControlsVisibleCommand = new Command(() => ControlsVisible ^= true);
 			SizeChanged += MainWindow_SizeChanged;
 			CommandsTextInput.SelectionChanged += CommandsTextInput_SelectionChanged;
-			CommandsTextInput.TextChanged += CommandsTextInput_TextChanged; ;
+			CommandsTextInput.TextChanged += CommandsTextInput_TextChanged;
+
+			SetWindowState(App.Instance.LaunchFullScreen);
+			if (App.Instance.LaunchHiddenControlPanel) {
+				ToggleControlPanel();
+			}
+
 			DataContext = this;
 			Instance = this;
 		}
 
-		public void Init() {
+		public void RemoveAllPaths() {
 			List<UIElement> toRemove = new List<UIElement>();
 			foreach (UIElement child in Paths.Children) {
 				if (child.GetType() == typeof(Path)) {
@@ -185,6 +181,11 @@ namespace TurtleGraphics {
 			foreach (var item in toRemove) {
 				Paths.Children.Remove(item);
 			}
+		}
+
+		public void Init() {
+			RemoveAllPaths();
+
 			_currentFigure = null;
 			_currentPath = null;
 
@@ -206,7 +207,6 @@ namespace TurtleGraphics {
 			NewPath();
 		}
 
-
 		#region Events
 
 		private void MainWindow_Loaded(object sender, RoutedEventArgs e) {
@@ -215,30 +215,22 @@ namespace TurtleGraphics {
 			_inteliCommandsScroller = FindDescendant<ScrollViewer>(InteliCommands);
 			Init();
 			CommandsText = FSSManager.RestoreCodeIfExists();
-			App application = (Application.Current as App);
-			if (application.LaunchFullScreen.HasValue && application.LaunchFullScreen.Value) {
-				ToggleFullScreenCommand.Execute(null);
-			}
-			if (application.Deserialized != null) {
+			if (App.Instance.Deserialized != null) {
 				cancellationTokenSource = new CancellationTokenSource();
-				_ = ExecuteCode(application.Deserialized);
+				_ = ExecuteCode(App.Instance.Deserialized);
 			}
 			Loaded -= MainWindow_Loaded;
 		}
 
 		private async Task ExecuteCode(TurtleGraphicsCodeData deserialized) {
-			WindowState = WindowState.Maximized;
-			ControlArea.Width = new GridLength(0, GridUnitType.Pixel);
-			PreviewKeyDown += MainWindow_KeyDown;
-			await Task.Delay(1);
-			DrawWidth = DrawAreaX.ActualWidth;
+			ToggleControlPanel();
 			Init();
 			ShowTurtleCheckBox = deserialized.ShowTurtle;
 			AnimatePath = deserialized.AnimatePath;
 			PathAnimationFrames = deserialized.PathAnimationSpeed;
 			CalculationFramesPreUIUpdate = deserialized.TurtleSpeed;
 			BackgroundColor.Text = deserialized.BackgroundColor;
-
+			ButtonCommand = StopCommand;
 			await DrawData(deserialized.Data);
 		}
 
@@ -249,16 +241,19 @@ namespace TurtleGraphics {
 		private void MainWindow_SizeChanged(object sender, SizeChangedEventArgs e) {
 			DrawWidth = DrawAreaX.ActualWidth;
 			DrawHeight = DrawAreaY.ActualHeight;
+			TurtleTranslation.X = DrawWidth / 2;
+			TurtleTranslation.Y = DrawHeight / 2;
 		}
 
-		private async void MainWindow_KeyDown(object sender, KeyEventArgs e) {
+		private void MainWindow_KeyDown(object sender, KeyEventArgs e) {
 			if (e.Key == Key.Escape) {
-				ControlArea.Width = new GridLength(1, GridUnitType.Star);
-				ImgSource = new BitmapImage();
-				await Task.Delay(1);
-				DrawWidth = DrawAreaX.ActualWidth;
-				ControlsHidden = false;
-				PreviewKeyDown -= MainWindow_KeyDown;
+				if (!ControlPanelHolderVisible) {
+					ToggleControlPanel();
+				}
+				ImgSource = null;
+				RemoveAllPaths();
+				UpdateLayout();
+				ToggleFullScreenAction();
 			}
 		}
 
@@ -305,12 +300,24 @@ namespace TurtleGraphics {
 		}
 
 		protected override void OnKeyDown(KeyEventArgs e) {
+			if (e.Key == Key.F11 && ControlPanelHolderVisible) {
+				SetWindowState(!IsFullscreen);
+			}
 			if (e.Key == Key.F5) {
 				if (!ExceptionDialogActive) {
-					ButtonCommand.Execute(null);
+					if (e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) || e.KeyboardDevice.IsKeyDown(Key.LeftCtrl)) {
+						RunFullscreenCommand.Execute(null);
+					}
+					else {
+						ButtonCommand.Execute(null);
+					}
 					e.Handled = true;
 				}
 			}
+		}
+
+		private void Grid_SizeChanged(object sender, SizeChangedEventArgs e) {
+			MainWindow_SizeChanged(sender, e);
 		}
 
 		#endregion
@@ -484,8 +491,7 @@ namespace TurtleGraphics {
 						break;
 					}
 					case ParsedAction.ScreenCapture: {
-						// Check if controls are hidden as well? Or not for the memes ;)
-						if (IsFullscreen) {
+						if (IsFullscreen && !ControlPanelHolderVisible) {
 							await Capture();
 						}
 						break;
@@ -533,12 +539,10 @@ namespace TurtleGraphics {
 			Init();
 			cancellationTokenSource = new CancellationTokenSource();
 			ButtonCommand = StopCommand;
-			ButtonText = "Stop (F5)";
+			ButtonText = GenericStop;
 			try {
-				_compilationStatus.Status = "Parsing text...";
 				FSSManager.CreateCodeBackup(CommandsText);
 				Queue<ParsedData> tasks = CommandParser.ParseCommands(CommandsText, this);
-				_compilationStatus.Status = "Compiling...";
 				List<TurtleData> compiledTasks = await CompileTasks(tasks, cancellationTokenSource.Token);
 				_compilationStatus.Stop();
 				Stopwatch s = new Stopwatch();
@@ -558,7 +562,7 @@ namespace TurtleGraphics {
 			}
 			finally {
 				ButtonCommand = RunCommand;
-				ButtonText = "Run (F5)";
+				ButtonText = GenericRun;
 				ToggleFullscreenEnabled = true;
 			}
 		}
@@ -583,19 +587,78 @@ namespace TurtleGraphics {
 		}
 
 		public void ToggleFullScreenAction() {
-			if (WindowStyle == WindowStyle.SingleBorderWindow) {
-				WindowStyle = WindowStyle.None;
-				WindowState = WindowState.Maximized;
+			SetWindowState(!IsFullscreen);
+			ImgSource = null;
+		}
+
+		private void ToggleControlPanel() {
+			ControlPanelHolderVisible = !ControlPanelHolderVisible;
+			if (ControlPanelHolderVisible) {
+				SplitterCol.Width = new GridLength(5, GridUnitType.Pixel);
+				ControlArea.Width = new GridLength(1, GridUnitType.Star);
+			}
+			else {
 				SplitterCol.Width = new GridLength(0);
-				IsFullscreen = true;
+				ControlArea.Width = new GridLength(0, GridUnitType.Pixel);
+			}
+			UpdateLayout();
+			DrawWidth = DrawAreaX.ActualWidth;
+			DrawHeight = DrawAreaY.ActualHeight;
+			UpdateLayout();
+		}
+
+		private void SetWindowState(bool isFullscreen) {
+			if (isFullscreen) {
+				WindowStyle = WindowStyle.None;
+				// When the window is maximized, fullscreen toggle fails to cover the taskbar, this hack fixes it
+				if (WindowState == WindowState.Minimized) {
+					WindowState = WindowState.Normal;
+				}
+				WindowState = WindowState.Maximized;
+				PreviewKeyDown += MainWindow_KeyDown;
 			}
 			else {
 				WindowStyle = WindowStyle.SingleBorderWindow;
 				WindowState = WindowState.Normal;
-				ImgSource = new BitmapImage();
-				SplitterCol.Width = new GridLength(5);
-				IsFullscreen = false;
+				PreviewKeyDown -= MainWindow_KeyDown;
 			}
+			IsFullscreen = isFullscreen;
+		}
+
+		public async Task LoadCommandAction() {
+			if (!NoWindowsActive)
+				return;
+			LoadDialogActive = true;
+			SavedData data = await FSSManager.Load();
+			LoadDialogActive = false;
+			if (data.Name != null) {
+				CommandsText = data.Code;
+			}
+		}
+
+		public void SaveCommandAction() {
+			if (!NoWindowsActive)
+				return;
+			SaveDialogActive = true;
+			SaveDialog d = new SaveDialog();
+			Grid.SetColumn(d, PAGES_COLUMN_INDEX);
+			Paths.Children.Add(d);
+		}
+
+		public void StopCommandAction() {
+			cancellationTokenSource.Cancel();
+			ButtonCommand = RunCommand;
+			ButtonText = GenericRun;
+		}
+
+		public async Task RunFullscreenCommandAction() {
+			if (!IsFullscreen) {
+				ToggleFullScreenAction();
+			}
+			if (ControlPanelHolderVisible) {
+				ToggleControlPanel();
+			}
+			await RunCommandAction();
 		}
 
 		public bool NoWindowsActive => !(SaveDialogActive || LoadDialogActive || ExceptionDialogActive);

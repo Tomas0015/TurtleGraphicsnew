@@ -104,6 +104,7 @@
     </ApplicationDefinition>
     <Compile Include="Exceptions\ParsingException.cs" />
     <Compile Include="Helpers\FleeHelper.cs" />
+    <Compile Include="locale\Locale.cs" />
     <Compile Include="Parsed Data\BrushCappingData.cs" />
     <Compile Include="Parsed Data\ContextExtensions.cs" />
     <Compile Include="IO\FileSystemManager.cs" />
@@ -222,6 +223,16 @@
     <None Include="SavedData\HowTo.tgs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="locale\en-us.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="locale\cs-cz.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

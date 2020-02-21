@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using Igor.Localization;
+using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 
@@ -29,9 +30,8 @@ namespace TurtleGraphics {
 		}
 
 
-		private string _status = "Compiling...";
+		public string Status => LocaleProvider.Instance.Get(Locale.COMP_STATUS__COMPILING);
 
-		public string Status { get => _status; set { _status = value; Notify(nameof(Status)); } }
 		public bool Rotate { get; set; } = true;
 		private bool _turtleVisibleBck;
 

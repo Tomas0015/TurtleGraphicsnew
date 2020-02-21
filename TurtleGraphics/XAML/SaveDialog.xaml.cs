@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Igor.Localization;
 using Igor.Models;
 
 namespace TurtleGraphics {
@@ -18,6 +19,10 @@ namespace TurtleGraphics {
 		}
 
 		#endregion
+
+		public string Save_Name => LocaleProvider.Instance.Get(Locale.SAVE__NAME);
+		public string GenericSave => LocaleProvider.Instance.Get(Locale.GENERIC_SAVE);
+		public string GenericCancel => LocaleProvider.Instance.Get(Locale.GENERIC_CANCEL);
 
 		public SaveDialog() {
 			InitializeComponent();

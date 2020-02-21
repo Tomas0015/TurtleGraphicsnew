@@ -1,0 +1,17 @@
+﻿41051367:Sestavuji...
+5665650:Zrušit
+70725580:Načíst
+84416465:Jméno skeče:
+27899898:Uložit
+97182944:Úhel:
+83399757:Barva Pozadí:
+82349694:Animovat Cestu
+80543611:Rychlost animace cesty:
+62062242:Rychlost Želvy:
+77918172:Zobraz/Skryj ovládání
+47297997:Želví Grafika
+36001163:Zobrazovat Želvu
+2417883:Spustit na celé obrazovce
+30044441:Nastavení WIP
+80317709:Start
+59860665:Stop

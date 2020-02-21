@@ -38,11 +38,11 @@
 							</EventTrigger>
 						</Grid.Triggers>
 						<TextBlock Margin="5 0 0 0" Text="{Binding Name}" FontSize="16" FontWeight="DemiBold" VerticalAlignment="Center"/>
-						<Button Padding="20 5" Grid.Column="1" Content="Load" Command="{Binding ElementName=Root, Path=DataContext.LoadCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Grid}, Path=DataContext}"/>
+						<Button Padding="20 5" Grid.Column="1" Content="{Binding ElementName=Root, Path=DataContext.GenericLoad, FallbackValue='Load'}" Command="{Binding ElementName=Root, Path=DataContext.LoadCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Grid}, Path=DataContext}"/>
 					</Grid>
 				</DataTemplate>
 			</ListBox.ItemTemplate>
 		</ListBox>
-		<Button Content="Cancel" Command="{Binding CancelCommand}" Grid.Row="1"/>
+		<Button Content="{Binding GenericCancel, FallbackValue='Cancel'}" Command="{Binding CancelCommand}" Grid.Row="1"/>
 	</Grid>
 </UserControl>

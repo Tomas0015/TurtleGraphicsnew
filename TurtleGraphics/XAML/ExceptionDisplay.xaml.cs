@@ -53,7 +53,7 @@ namespace TurtleGraphics {
 			get => _exceptionMessage;
 			set {
 				bool success = CommandParser.LineIndexes.TryGetValue(Exception.LineText, out int val);
-				_exceptionMessage = value + $"{Environment.NewLine}  at line ({(success ? val.ToString() : "who knows")}): {Exception.LineText}";
+				_exceptionMessage = value + $"{Environment.NewLine}  at line ({(success ? val.ToString() : "unable to determine")}): {Exception.LineText}";
 				Notify(nameof(ExceptionMessage));
 			}
 		}
