@@ -157,7 +157,6 @@ namespace TurtleGraphics {
 
 			Loaded += MainWindow_Loaded;
 			Closed += MainWindow_Closed;
-			PreviewKeyDown += MainWindow_KeyDown;
 
 			SizeChanged += MainWindow_SizeChanged;
 			CommandsTextInput.SelectionChanged += CommandsTextInput_SelectionChanged;
