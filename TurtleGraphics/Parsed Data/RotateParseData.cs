@@ -12,7 +12,7 @@ namespace TurtleGraphics {
 			_expression = expression;
 			string exceptionMessage = "Invalid arguments for rotation";
 			if(info.Arguments.Length > 2) {
-				throw new ParsingException("Extra agruments supplied, maximum of 2 allowed for this function." ,line);
+				throw new ParsingException("Extra arguments supplied, maximum of 2 allowed for this function." ,line);
 			}
 			if (info.Arguments.Length == 2) {
 				try {

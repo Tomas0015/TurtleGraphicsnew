@@ -29,7 +29,7 @@ namespace TurtleGraphics.Parsers {
 				// int i=0;i<20;i++){
 				// int i=0;i<20;i++)
 				// long val=1; val <50; val+=2){
-				errorMessage = "Unsupported interation type!";
+				errorMessage = "Unsupported iteration type!";
 				mod = mod.Replace("int ", "").Replace("long ", "");
 
 				// i = 0; i < 50; i++) {

@@ -9,7 +9,7 @@
 	<Grid>
 		<Grid Background="Red" Opacity="0.6"/>
 		<StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Background="DarkRed" Margin="20">
-			<TextBlock Text="An exception occured!" FontSize="24" FontWeight="DemiBold" Margin="5 0"/>
+			<TextBlock Text="An exception occurred!" FontSize="24" FontWeight="DemiBold" Margin="5 0"/>
 			<TextBlock Text="Message:" FontWeight="Bold" Margin="5 0"/>
 			<TextBlock TextWrapping="Wrap" Text="{Binding ExceptionMessage}" Margin="5 0"/>
 			<TextBlock Text="Stack Trace:" FontWeight="Bold" Margin="5 0"/>

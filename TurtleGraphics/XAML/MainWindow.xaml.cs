@@ -15,6 +15,7 @@ using System.Windows.Media.Imaging;
 using static TurtleGraphics.Helpers;
 using Path = System.Windows.Shapes.Path;
 using Igor.Localization;
+using System.Windows.Interop;
 
 namespace TurtleGraphics {
 	/// <summary>
@@ -156,6 +157,7 @@ namespace TurtleGraphics {
 
 			Loaded += MainWindow_Loaded;
 			Closed += MainWindow_Closed;
+			PreviewKeyDown += MainWindow_KeyDown;
 
 			SizeChanged += MainWindow_SizeChanged;
 			CommandsTextInput.SelectionChanged += CommandsTextInput_SelectionChanged;
@@ -353,24 +355,10 @@ namespace TurtleGraphics {
 		}
 
 		private async Task Capture() {
-			PresentationSource presentationSource = PresentationSource.FromVisual(Application.Current.MainWindow);
-			Matrix m = presentationSource.CompositionTarget.TransformToDevice;
-			double dipWidth = m.M11;
-			double dipHeight = m.M22;
-			double actualHeight = SystemParameters.PrimaryScreenHeight * dipHeight;
-			double actualWidth = SystemParameters.PrimaryScreenWidth * dipWidth;
+			var (actualWidth, actualHeight) = GetActualScreenSize();
 
 			await Task.Run(() => {
-				using (MemoryStream ms = new MemoryStream()) {
-					int ix, iy, iw, ih;
-					ix = 0;
-					iy = 0;
-					iw = (int)actualWidth; //TODO validate
-					ih = (int)actualHeight; //TODO validate
-					System.Drawing.Bitmap image = new System.Drawing.Bitmap(iw, ih, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-					System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(image);
-					g.CopyFromScreen(ix, iy, ix, iy, new System.Drawing.Size(iw, ih), System.Drawing.CopyPixelOperation.SourceCopy);
-					image.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+				using (MemoryStream ms = CaptureScreenshot(actualWidth, actualHeight)) {
 					var i = new BitmapImage();
 					i.BeginInit();
 					i.CacheOption = BitmapCacheOption.OnLoad;
@@ -384,6 +372,27 @@ namespace TurtleGraphics {
 					});
 				}
 			});
+		}
+
+		private MemoryStream CaptureScreenshot(int width, int height) {
+			MemoryStream ms = new MemoryStream();
+			int ix = 0;
+			int iy = 0;
+			System.Drawing.Bitmap image = new System.Drawing.Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+			System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(image);
+			g.CopyFromScreen(ix, iy, ix, iy, new System.Drawing.Size(width, height), System.Drawing.CopyPixelOperation.SourceCopy);
+			image.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+			return ms;
+		}
+
+		private (int, int) GetActualScreenSize() {
+			PresentationSource presentationSource = PresentationSource.FromVisual(Application.Current.MainWindow);
+			Matrix m = presentationSource.CompositionTarget.TransformToDevice;
+			double dipWidth = m.M11;
+			double dipHeight = m.M22;
+			double actualHeight = SystemParameters.PrimaryScreenHeight * dipHeight;
+			double actualWidth = SystemParameters.PrimaryScreenWidth * dipWidth;
+			return ((int)actualWidth, (int)actualHeight);
 		}
 
 
@@ -551,7 +560,7 @@ namespace TurtleGraphics {
 				s.Stop();
 			}
 			catch (OperationCanceledException) {
-				//Operation was cancelled
+				//Operation was canceled
 				_compilationStatus.Stop();
 			}
 			catch (ParsingException e) {

@@ -14,7 +14,7 @@ namespace TurtleGraphics {
 			ExpressionContext expression = FleeHelper.GetExpression(variables);
 			string exceptionMessage = "";
 			if(args.Length > 2) {
-				throw new ParsingException("Extra agruments supplied, maximum of 2 allowed for this function.", line);
+				throw new ParsingException("Extra arguments supplied, maximum of 2 allowed for this function.", line);
 			}
 			try {
 				exceptionMessage = "Invalid expression for X coordinate!";

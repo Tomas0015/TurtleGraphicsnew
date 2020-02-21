@@ -169,7 +169,7 @@ namespace TurtleGraphics {
 				return new VariableData(variableDef.Item2, valueObj, variables, line);
 			}
 
-			throw new ParsingException($"Unexpected squence!", line);
+			throw new ParsingException($"Unexpected sequence!", line);
 		}
 
 		private static IGenericExpression<T> ParseGenericExpression<T>(string line, string fullLine, Dictionary<string, object> variables) {

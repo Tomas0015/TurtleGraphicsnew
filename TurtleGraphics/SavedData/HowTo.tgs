@@ -8,6 +8,9 @@
 // Moves the turtle to specified 'x','y' coordinates
 //MoveTo(int x, int y);
 
+// Draws while moving the turtle to the provided 'x' and 'y' coordinates
+//DrawTo(int x, int y);
+
 // Sets pen color
 // 1) a string formatted as "#xxxxxx" where each pair of x-es represents a hex value
 // 2) a byte value for each color channel
@@ -35,6 +38,10 @@
 
 // Makes the turtle draw when moving
 //PenDown();
+
+// Captures the screen and removes all drawn lines, then applies the screenshot as a background.
+// This is meant for optimization
+//CaptureScreenshot();
 
 // Cycles
 //  For Loop:
