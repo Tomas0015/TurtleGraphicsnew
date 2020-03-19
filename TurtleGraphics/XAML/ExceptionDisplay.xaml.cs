@@ -1,74 +1,85 @@
-﻿using System;
+﻿using Igor.Models;
+using System;
 using System.ComponentModel;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Igor.Models;
 
-namespace TurtleGraphics {
-	/// <summary>
-	/// Interaction logic for ExceptionDisplay.xaml
-	/// </summary>
-	public partial class ExceptionDisplay : UserControl, INotifyPropertyChanged {
+namespace TurtleGraphics
+{
+    /// <summary>
+    /// Interaction logic for ExceptionDisplay.xaml
+    /// </summary>
+    public partial class ExceptionDisplay : UserControl, INotifyPropertyChanged
+    {
 
-		#region Notifications
+        #region Notifications
 
-		public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler PropertyChanged;
 
-		private void Notify(string prop) {
-			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
-		}
+        private void Notify(string prop)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
+        }
 
-		#endregion
+        #endregion
 
-		public ExceptionDisplay() {
-			InitializeComponent();
-			DataContext = this;
-			Grid.SetColumn(this, 1);
+        public ExceptionDisplay()
+        {
+            InitializeComponent();
+            DataContext = this;
+            Grid.SetColumn(this, 1);
 
-			_dismissCommand = new Command(() => {
-				MainWindow.Instance.Paths.Children.Remove(this);
-				MainWindow.Instance.ShowTurtleCheckBox = _turtleVisibilityBck;
-				MainWindow.Instance.ExceptionDialogActive = false;
-			});
-			Loaded += ExceptionDisplay_Loaded;
-		}
+            _dismissCommand = new Command(() =>
+            {
+                MainWindow.Instance.Paths.Children.Remove(this);
+                MainWindow.Instance.ShowTurtleCheckBox = _turtleVisibilityBck;
+                MainWindow.Instance.ExceptionDialogActive = false;
+            });
+            Loaded += ExceptionDisplay_Loaded;
+        }
 
-		private void ExceptionDisplay_Loaded(object sender, System.Windows.RoutedEventArgs e) {
-			MainWindow.Instance.ExceptionDialogActive = true;
-			_turtleVisibilityBck = MainWindow.Instance.ShowTurtleCheckBox;
-			MainWindow.Instance.ShowTurtleCheckBox = false;
-			FocusMe.Focus();
-		}
+        private void ExceptionDisplay_Loaded(object sender, System.Windows.RoutedEventArgs e)
+        {
+            MainWindow.Instance.ExceptionDialogActive = true;
+            _turtleVisibilityBck = MainWindow.Instance.ShowTurtleCheckBox;
+            MainWindow.Instance.ShowTurtleCheckBox = false;
+            FocusMe.Focus();
+        }
 
-		private bool _turtleVisibilityBck;
-		private ParsingException _exception;
+        private bool _turtleVisibilityBck;
+        private ParsingException _exception;
 
-		private string _exceptionMessage;
-		private ICommand _dismissCommand;
-		private string _stackTrace;
+        private string _exceptionMessage;
+        private ICommand _dismissCommand;
+        private string _stackTrace;
 
-		public string StackTrace { get => _stackTrace; set { _stackTrace = value; Notify(nameof(StackTrace)); } }
-		public ICommand DismissCommand { get => _dismissCommand; set { _dismissCommand = value; Notify(nameof(DismissCommand)); } }
-		public string ExceptionMessage {
-			get => _exceptionMessage;
-			set {
-				bool success = CommandParser.LineIndexes.TryGetValue(Exception.LineText, out int val);
-				_exceptionMessage = value + $"{Environment.NewLine}  at line ({(success ? val.ToString() : "unable to determine")}): {Exception.LineText}";
-				Notify(nameof(ExceptionMessage));
-			}
-		}
+        public string StackTrace { get => _stackTrace; set { _stackTrace = value; Notify(nameof(StackTrace)); } }
+        public ICommand DismissCommand { get => _dismissCommand; set { _dismissCommand = value; Notify(nameof(DismissCommand)); } }
+        public string ExceptionMessage
+        {
+            get => _exceptionMessage;
+            set
+            {
+                bool success = CommandParser.LineIndexes.TryGetValue(Exception.LineText, out int val);
+                _exceptionMessage = value + $"{Environment.NewLine}  at line ({(success ? val.ToString() : "unable to determine")}): {Exception.LineText}";
+                Notify(nameof(ExceptionMessage));
+            }
+        }
 
-		public ParsingException Exception {
-			get => _exception;
-			set {
-				_exception = value;
-				StackTrace = value.StackTrace;
-			}
-		}
+        public ParsingException Exception
+        {
+            get => _exception;
+            set
+            {
+                _exception = value;
+                StackTrace = value.StackTrace;
+            }
+        }
 
-		public void Show() {
-			Grid.SetColumn(this, 2);
-			MainWindow.Instance.Paths.Children.Add(this);
-		}
-	}
+        public void Show()
+        {
+            Grid.SetColumn(this, 2);
+            MainWindow.Instance.Paths.Children.Add(this);
+        }
+    }
 }

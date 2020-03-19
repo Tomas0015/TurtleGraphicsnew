@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace TurtleGraphicsCode {
-	public interface IRule {
+namespace TurtleGraphicsCode
+{
+    public interface IRule
+    {
 
-		Turtle Turtle { get; }
+        Turtle Turtle { get; }
 
-		Dictionary<char, string> Rules { get; }
+        Dictionary<char, string> Rules { get; }
 
-		Dictionary<char, Action<Turtle>> Actions { get; }
+        Dictionary<char, Action<Turtle>> Actions { get; }
 
-		string Axiom { get; }
-	}
+        string Axiom { get; }
+    }
 }

@@ -2,31 +2,37 @@
 using System.Collections.Generic;
 using System.Threading;
 
-namespace TurtleGraphics {
-	public class PenPositionData : ParsedData {
+namespace TurtleGraphics
+{
+    public class PenPositionData : ParsedData
+    {
 
-		public PenPositionData(bool state, Dictionary<string, object> variables, string line) : base(variables, line) {
-			PenState = state;
-		}
+        public PenPositionData(bool state, Dictionary<string, object> variables, string line) : base(variables, line)
+        {
+            PenState = state;
+        }
 
-		public bool PenState { get; set; }
+        public bool PenState { get; set; }
 
-		public override bool IsBlock => false;
+        public override bool IsBlock => false;
 
-		public override ParsedAction Action => ParsedAction.PenState;
+        public override ParsedAction Action => ParsedAction.PenState;
 
-		public override string Line { get; set; }
+        public override string Line { get; set; }
 
-		public override TurtleData Compile(CancellationToken token) {
-			token.ThrowIfCancellationRequested();
-			return new TurtleData {
-				PenDown = PenState,
-				Action = Action,
-			};
-		}
+        public override TurtleData Compile(CancellationToken token)
+        {
+            token.ThrowIfCancellationRequested();
+            return new TurtleData
+            {
+                PenDown = PenState,
+                Action = Action,
+            };
+        }
 
-		public override IList<TurtleData> CompileBlock(CancellationToken token) {
-			throw new NotImplementedException();
-		}
-	}
+        public override IList<TurtleData> CompileBlock(CancellationToken token)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

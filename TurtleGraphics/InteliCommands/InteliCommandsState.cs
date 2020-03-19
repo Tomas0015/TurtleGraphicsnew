@@ -1,6 +1,8 @@
-﻿namespace TurtleGraphics {
-	public enum InteliCommandsState {
-		Normal,
-		IsSuggesting
-	}
+﻿namespace TurtleGraphics
+{
+    public enum InteliCommandsState
+    {
+        Normal,
+        IsSuggesting
+    }
 }
