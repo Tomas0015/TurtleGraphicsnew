@@ -14,16 +14,16 @@
 			t.SetBrushSize(1);
 			t.AnimatePath = false;
 			t.TurtleSpeed = 25;
-			t.Rotate(0);
 			t.SetColor("brown");
-			t = txt.Write(t, "Želva", true);
+			t = txt.Write(t, "Želva", true, 1);
 			t.Rotate(22.5);
 			t.SetColor("Black");
-			t = txt.Write(t, "píše!", true);
+			t = txt.Write(t, "píše!", false, 1);
 			for (int i = 0; i < 14; i++)
 			{
 				t.Rotate(22.5);
-				t = txt.Write(t, i + string.Empty, true);
+				//t.CaptureScreenshot();
+				t = txt.Write(t, i + string.Empty, (i % 2) == 1, 1);
 			}
 			
 			
