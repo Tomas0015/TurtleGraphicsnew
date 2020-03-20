@@ -6,20 +6,24 @@ namespace TurtleGraphicsCode
 {
 	public class Text
 	{
-		public Turtle Write(Turtle writer, String input, bool inv, double brushSize)
+		public Turtle Write(Turtle writer, string input, bool inv = false, double brushSize = 1, Font textFont = null)
 		{
+			if (textFont == null)
+			{
+				textFont = new Font(SystemFonts.DefaultFont.FontFamily, 36, FontStyle.Regular);
+			}
 			if (input == string.Empty)
 			{
 				return writer;
 			}
 			char[] chars = input.ToCharArray();
-			string[] lines = new string[CharToImage('A').Height];
+			string[] lines = new string[CharToImage('A', textFont).Height];
 			writer.SetBrushSize(brushSize);
 			for (int ctr = 0; ctr < chars.Length; ctr++)
 			{
 
 
-				Bitmap image = CharToImage(chars[ctr]);
+				Bitmap image = CharToImage(chars[ctr], textFont);
 
 				for (int h = 0; h < image.Height; h++)
 				{
@@ -51,7 +55,7 @@ namespace TurtleGraphicsCode
 					lineCopy = lineCopy.Substring(temp);
 					writer.Forward(temp);
 					totalProceed += temp;
-					Console.WriteLine(totalProceed + "/" + line.Length);
+					//Console.WriteLine(totalProceed + "/" + line.Length);
 				}
 				writer.PenUp();
 				writer = TurleReturn(writer, line.Length, brushSize);
@@ -103,7 +107,7 @@ namespace TurtleGraphicsCode
 			t.Rotate(-180,false);
 			return t;
 		}
-		static Bitmap CharToImage(char inputChar)
+		static Bitmap CharToImage(char inputChar, Font textFont)
 		{
 			Bitmap image = new Bitmap(64, 64);
 			RectangleF rectf = new RectangleF(0, 0, 64, 64);
@@ -115,7 +119,7 @@ namespace TurtleGraphicsCode
 				StringFormat sf = new StringFormat();
 				sf.Alignment = StringAlignment.Center;
 				sf.LineAlignment = StringAlignment.Center;
-				g.DrawString(inputChar.ToString(), new Font(SystemFonts.DefaultFont.FontFamily, 36, FontStyle.Underline), Brushes.Black, rectf, sf);
+				g.DrawString(inputChar.ToString(), textFont, Brushes.Black, rectf, sf);
 			}
 
 			return image;
