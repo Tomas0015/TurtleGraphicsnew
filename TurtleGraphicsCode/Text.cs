@@ -6,7 +6,7 @@ namespace TurtleGraphicsCode
 {
 	public class Text
 	{
-		public Turtle Write(Turtle writer, string input, bool inv = false, double brushSize = 1, Font textFont = null)
+		public Turtle Write(Turtle writer, string input, bool inv = false, double brushSize = 1, Font textFont = null, int width = 64, int height = 64)
 		{
 			if (textFont == null)
 			{
@@ -17,13 +17,13 @@ namespace TurtleGraphicsCode
 				return writer;
 			}
 			char[] chars = input.ToCharArray();
-			string[] lines = new string[CharToImage('A', textFont).Height];
+			string[] lines = new string[height];
 			writer.SetBrushSize(brushSize);
 			for (int ctr = 0; ctr < chars.Length; ctr++)
 			{
 
 
-				Bitmap image = CharToImage(chars[ctr], textFont);
+				Bitmap image = CharToImage(chars[ctr], textFont, width, height);
 
 				for (int h = 0; h < image.Height; h++)
 				{
@@ -107,10 +107,10 @@ namespace TurtleGraphicsCode
 			t.Rotate(-180,false);
 			return t;
 		}
-		static Bitmap CharToImage(char inputChar, Font textFont)
+		static Bitmap CharToImage(char inputChar, Font textFont, int width, int height)
 		{
-			Bitmap image = new Bitmap(64, 64);
-			RectangleF rectf = new RectangleF(0, 0, 64, 64);
+			Bitmap image = new Bitmap(width, height);
+			RectangleF rectf = new RectangleF(0, 0, width, height);
 			using (Graphics g = Graphics.FromImage(image))
 			{
 				g.SmoothingMode = SmoothingMode.AntiAlias;
