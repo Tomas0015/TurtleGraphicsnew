@@ -107,7 +107,7 @@ namespace TurtleGraphicsCode
             set
             {
                 if (_turtleSpeed == value) return;
-                if (value < 1 || value > 25) throw new Exception("Only values between 1 and 25");
+                if (value < 1 || value > 50) throw new Exception("Only values between 1 and 25");
                 _turtleSpeed = value;
             }
         }

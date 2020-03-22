@@ -1,5 +1,4 @@
-﻿using System;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Drawing.Drawing2D;
 
 namespace TurtleGraphicsCode
@@ -8,13 +7,13 @@ namespace TurtleGraphicsCode
 	{
 		public Turtle Write(Turtle writer, string input, bool inv = false, double brushSize = 1, Font textFont = null, int width = 64, int height = 64)
 		{
-			if (textFont == null)
-			{
-				textFont = new Font(SystemFonts.DefaultFont.FontFamily, 36, FontStyle.Regular);
-			}
 			if (input == string.Empty)
 			{
 				return writer;
+			}
+			if (textFont == null)
+			{
+				textFont = new Font(SystemFonts.DefaultFont.FontFamily, 36, FontStyle.Regular);
 			}
 			char[] chars = input.ToCharArray();
 			string[] lines = new string[height];
