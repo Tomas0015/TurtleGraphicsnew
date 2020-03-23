@@ -10,10 +10,10 @@ namespace TurtleGraphicsCode
 			Turtle t = new Turtle(true);
 			Text txt = new Text();
 			ImagePrint prn = new ImagePrint();
-			t = prn.Print(t,"ll");
 			t.SetBrushSize(1);
 			t.AnimatePath = false;
 			t.TurtleSpeed = 50;
+			t = prn.Print(t, "image.bmp");
 			t.SetColor("brown");
 			t = txt.Write(t, "Želva", true, 1);
 			t.Rotate(22.5);

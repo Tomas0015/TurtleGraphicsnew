@@ -15,7 +15,7 @@ namespace TurtleGraphicsCode
 			printer.ShowTurtle = false;
 			int width = 64;
 			int height = 64;
-			Bitmap image = (Bitmap)Image.FromFile(@"image.bmp", true);
+			Bitmap image = (Bitmap)Image.FromFile(input, true);
 			for (int i = 0; i < image.Height; i++)
 			{
 				for (int j = 0; j < image.Width; j++)
